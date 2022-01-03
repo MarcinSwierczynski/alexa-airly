@@ -11,7 +11,8 @@ public class AirQualityStreamHandler extends SkillStreamHandler {
   }
 
   private static Skill getSkill() {
-    AirQualityIntentHandler airQualityIntentHandler = new AirQualityIntentHandler();
+    AirlyClient airlyClient = new AirlyClient();
+    AirQualityIntentHandler airQualityIntentHandler = new AirQualityIntentHandler(airlyClient);
 
     return Skills.standard()
         .addRequestHandlers(
