@@ -11,22 +11,36 @@ class AirlyClient {
   private static final String MAX_DISTANCE_KM = "1";
 
   AirQuality fetchAirQuality(String latitude, String longitude) {
-    JsonNode response = Unirest.get(ENDPOINT)
+    JsonNode response = getBody(latitude, longitude);
+    JSONObject current = getCurrent(response);
+
+    JSONObject indexes = current
+        .getJSONArray("indexes")
+        .getJSONObject(0);
+
+    JSONObject pm25 = current
+        .getJSONArray("standards")
+        .getJSONObject(0);
+
+    return new AirQuality(
+        indexes.getString("description"),
+        indexes.getDouble("value"),
+        pm25.getDouble("percent")
+    );
+  }
+
+  private JsonNode getBody(String latitude, String longitude) {
+    return Unirest.get(ENDPOINT)
         .header("apikey", API_KEY)
         .queryString("lat", latitude)
         .queryString("lng", longitude)
         .queryString("maxDistanceKM", MAX_DISTANCE_KM)
         .asJson()
         .getBody();
+  }
 
-    JSONObject indexes = response.getObject()
-        .getJSONObject("current")
-        .getJSONArray("indexes")
-        .getJSONObject(0);
-
-    return new AirQuality(
-        indexes.getString("description"),
-        indexes.getDouble("value")
-    );
+  private JSONObject getCurrent(JsonNode response) {
+    return response.getObject()
+        .getJSONObject("current");
   }
 }

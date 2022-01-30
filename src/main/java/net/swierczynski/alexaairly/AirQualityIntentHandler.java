@@ -34,7 +34,11 @@ class AirQualityIntentHandler implements RequestHandler {
   private String getSpeechText() {
     AirQuality airQuality = airlyClient.fetchAirQuality("50.273966", "19.004781");
     String description = airQuality.getDescription();
-    int caqi = (int) Math.round(airQuality.getValue());
-    return format("%s The Common Air Quality Index is %s.", description, caqi);
+    int caqi = (int) Math.round(airQuality.getCaqi());
+    int pm25percent = (int) Math.round(airQuality.getPm25Percent());
+    return format(
+        "%s The Common Air Quality Index is %s. The PM2.5 is %s%%",
+        description, caqi, pm25percent
+    );
   }
 }
