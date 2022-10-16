@@ -4,6 +4,11 @@ import kong.unirest.JsonNode;
 import kong.unirest.Unirest;
 import kong.unirest.json.JSONObject;
 
+import java.util.Iterator;
+import java.util.Spliterator;
+import java.util.Spliterators;
+import java.util.stream.StreamSupport;
+
 class AirlyClient {
 
   private static final String ENDPOINT = "https://airapi.airly.eu/v2/measurements/nearest";
@@ -18,9 +23,16 @@ class AirlyClient {
         .getJSONArray("indexes")
         .getJSONObject(0);
 
-    JSONObject pm25 = current
+    Iterator<Object> standards = current
         .getJSONArray("standards")
-        .getJSONObject(0);
+        .iterator();
+
+    JSONObject pm25 = StreamSupport
+        .stream(Spliterators.spliteratorUnknownSize(standards, Spliterator.ORDERED), false)
+        .map(jsonObject -> ((JSONObject) jsonObject))
+        .filter(standard -> standard.getString("pollutant").equalsIgnoreCase("PM25"))
+        .findFirst()
+        .orElseThrow();
 
     return new AirQuality(
         indexes.getString("description"),
